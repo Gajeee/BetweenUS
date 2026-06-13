@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BETWEEN US</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Palette */
+            --bg-color: #F6F1EA;
+            --card-bg: #FFFDF8;
+            --text-main: #2C241D;
+            --accent: #A67C52; 
+            --accent-light: #D7C4B2;
+            
+            /* Typography */
+            --font-logo: 'Playfair Display', serif;
+            --font-body: 'Cormorant Garamond', serif;
+            --font-ui: 'Inter', sans-serif;
+
+            /* Spacing */
+            --spacing-sm: 10px;
+            --spacing-md: 25px;
+            --spacing-lg: 50px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* Subtle paper grain texture */
+            background-image: radial-gradient(#E6E0D6 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* --- Typography Utilities --- */
+        .text-display {
+            font-family: var(--font-logo);
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .text-italic {
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .divider {
+            width: 1px;
+            height: 40px;
+            background-color: var(--accent);
+            margin: var(--spacing-md) auto;
+            opacity: 0.4;
+        }
+        
+        .divider-wide {
+            width: 60px;
+            height: 1px;
+            background-color: var(--accent);
+            margin: var(--spacing-md) auto;
+            opacity: 0.4;
+        }
+
+        /* --- Custom Logo Styling --- */
+        .custom-logo {
+            display: block;
+            margin: 15px auto 25px auto; /* Tightened spacing */
+            width: 85%;
+            max-width: 340px; /* Slightly smaller to fit screen better */
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(44, 36, 29, 0.15);
+            opacity: 1;
+        }
+
+        /* --- Views Container --- */
+        main {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px; /* Reduced padding slightly for intro */
+        }
+
+        /* --- Intro View --- */
+        #view-intro {
+            text-align: center;
+            /* Ensure it fits in viewport */
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+
+        .intro-title {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .intro-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 0;
+            color: var(--accent);
+            font-weight: 400;
+        }
+
+        .intro-body {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            margin-bottom: 30px; /* Reduced margin */
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            color: #4a3f35;
+        }
+
+        .btn-begin {
+            background-color: var(--text-main);
+            color: var(--card-bg);
+            font-family: var(--font-ui);
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 14px 35px;
+            border: 1px solid var(--text-main);
+            border-radius: 50px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            letter-spacing: 2px;
+        }
+
+        .btn-begin:hover {
+            background-color: transparent;
+            color: var(--text-main);
+            transform: translateY(-2px);
+        }
+
+        .scroll-indicator {
+            margin-top: 30px;
+            opacity: 0.4;
+            animation: bounce 2s infinite;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: var(--font-ui);
+        }
+
+        /* --- Home View (New Homely Design) --- */
+        #view-home {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            animation: fadeIn 1.2s ease-out;
+            padding: 40px 20px;
+        }
+
+        .home-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .home-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            letter-spacing: 0.15em;
+        }
+        
+        .home-header p {
+            font-size: 1rem;
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .category-card {
+            /* Clean, Homely Card Style */
+            background-color: #fff;
+            padding: 35px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(44, 36, 29, 0.04);
+            border: 1px solid rgba(166, 124, 82, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 170px;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px rgba(166, 124, 82, 0.1);
+        }
+
+        /* Clean Icons - No Background Circle */
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 20px;
+            stroke: var(--text-main);
+            stroke-width: 1.2;
+            fill: none;
+            transition: stroke 0.3s ease, transform 0.3s ease;
+        }
+        
+        .category-card:hover .card-icon {
+            stroke: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .card-title {
+            font-family: var(--font-ui);
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: var(--text-main);
+        }
+
+        .home-quote {
+            text-align: center;
+            font-style: italic;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            padding: 20px;
+            line-height: 1.6;
+            margin-top: auto;
+        }
+        
+        .home-subquote {
+            font-size: 0.8rem;
+            font-family: var(--font-ui);
+            color: var(--accent);
+            letter-spacing: 1.5px;
+            margin-top: 15px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* --- Question View (Restored to Premium V2) --- */
+        #view-question {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .nav-header {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            font-family: var(--font-ui);
+            font-size: 0.75rem;
+            color: var(--accent);
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: opacity 0.3s;
+        }
+        
+        .nav-header:hover { opacity: 0.6; }
+
+        .progress-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            font-family: var(--font-ui);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.5;
+        }
+
+        .question-card-wrapper {
+            width: 100%;
+            perspective: 1000px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            width: 100%;
+            padding: 60px 40px;
+            border-radius: 2px;
+            box-shadow: 0 20px 50px rgba(44, 36, 29, 0.04);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 320px;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .card-out {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        
+        .card-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .question-text {
+            font-size: 2rem;
+            line-height: 1.35;
+            margin-bottom: 10px;
+            font-weight: 400;
+            color: var(--text-main);
+        }
+
+        .controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .nav-btn {
+            background: none;
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 15px 25px;
+            border-radius: 50px;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background-color: rgba(166, 124, 82, 0.1);
+            color: var(--accent);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.2;
+            cursor: default;
+        }
+
+        /* --- Modal (Age Gate) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 36, 29, 0.95);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 50px 40px;
+            border-radius: 2px;
+            max-width: 90%;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-content h3 {
+            font-family: var(--font-logo);
+            font-weight: 500;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            letter-spacing: 0.05em;
+            color: var(--text-main);
+        }
+
+        .modal-content p {
+            font-family: var(--font-body);
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            color: #5c5044;
+        }
+        
+        .modal-age-text {
+            font-family: var(--font-ui);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-top: 10px;
+            display: block;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn-modal {
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-family: var(--font-ui);
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--text-main);
+            color: var(--card-bg);
+            border: 1px solid var(--text-main);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid #ccc;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--text-main);
+        }
+
+        /* --- Footer (Restored to Premium V2) --- */
+        footer {
+            padding: 40px 20px 30px;
+            text-align: center;
+            font-size: 0.7rem;
+            font-family: var(--font-ui);
+            opacity: 0.6;
+            margin-top: auto;
+            letter-spacing: 0.05em;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            background: linear-gradient(to top, #F6F1EA 80%, rgba(246,241,234,0));
+        }
+
+        .footer-brand {
+            display: block;
+            font-family: var(--font-logo);
+            font-size: 1rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
+        .footer-quote {
+            font-style: italic;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .footer-line {
+            display: block;
+            width: 30px;
+            height: 1px;
+            background: var(--accent);
+            margin: 15px auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .footer-link {
+            text-decoration: none;
+            color: var(--text-main);
+            transition: opacity 0.3s, color 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.65rem;
+        }
+        
+        .footer-link:hover {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 400px) {
+            .cards-grid { grid-template-columns: 1fr; }
+            .question-text { font-size: 1.6rem; }
+            .intro-title { font-size: 1.6rem; }
+            .category-card { height: 140px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Intro View -->
+    <main id="view-intro">
+        <h1 class="text-display intro-title">Between Us</h1>
+        <p class="intro-subtitle text-italic">Conversations you'll remember.</p>
+        
+        <!-- CUSTOM LOGO -->
+        <img src="love.jpeg" alt="Love Logo" class="custom-logo">
+        <!-- ---------------- -->
+
+        <div class="divider"></div>
+
+        <div class="intro-body">
+            Some of the best moments in a relationship<br>
+            begin with a question.<br><br>
+            Take your time.<br>
+            Listen carefully.<br>
+            Be honest.
+        </div>
+
+        <button class="btn-begin" onclick="goToHome()">Begin</button>
+
+        <div class="scroll-indicator">↓</div>
+    </main>
+
+    <!-- Home View -->
+    <main id="view-home" class="hidden">
+        <div class="home-header">
+            <h1 class="text-display">Between Us</h1>
+            <p>Conversations you'll remember.</p>
+        </div>
+
+        <div class="cards-grid">
+            <!-- DEEP -->
+            <div class="category-card" onclick="selectCategory('deep')">
+                <svg class="card-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <div class="card-title">Deep</div>
+            </div>
+            
+            <!-- CONNECTION -->
+            <div class="category-card" onclick="selectCategory('connection')">
+                <svg class="card-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="12" r="8"></circle>
+                    <circle cx="15" cy="12" r="8"></circle>
+                </svg>
+                <div class="card-title">Connection</div>
+            </div>
+
+            <!-- FUTURE -->
+            <div class="category-card" onclick="selectCategory('future')">
+                <svg class="card-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22V12"></path>
+                    <path d="M12 12c0-4 4-6 6-8 2 2 6 4 6 8"></path>
+                    <path d="M12 12c0-4-4-6-6-8-2 2-6 4-6 8"></path>
+                </svg>
+                <div class="card-title">Future</div>
+            </div>
+
+            <!-- UNFILTERED -->
+            <div class="category-card" onclick="checkAge()">
+                <svg class="card-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" transform="rotate(45 12 12)"></rect>
+                </svg>
+                <div class="card-title">Unfiltered</div>
+            </div>
+        </div>
+
+        <div class="home-quote">
+            "People will forget what you said,<br>
+            but they'll remember how you made them feel."
+            <div class="home-subquote">Begin with a question.</div>
+        </div>
+    </main>
+
+    <!-- Question View -->
+    <main id="view-question" class="hidden">
+        <div class="nav-header" onclick="goToHome()">
+            ← Categories
+        </div>
+
+        <div class="progress-container">
+            <span id="q-current">1</span> / <span id="q-total">30</span>
+        </div>
+
+        <div class="question-card-wrapper">
+            <div class="question-card card-in" id="card-element">
+                <div class="divider-wide"></div>
+                <h2 class="question-text" id="q-text">
+                    Loading...
+                </h2>
+                <div class="divider-wide"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="nav-btn" id="btn-prev" onclick="prevQuestion()">← Previous</button>
+            <button class="nav-btn" id="btn-next" onclick="nextQuestion()">Next →</button>
+        </div>
+    </main>
+
+    <!-- Age Verification Modal -->
+    <div class="modal-overlay" id="age-modal">
+        <div class="modal-content">
+            <h3>Before you continue...</h3>
+            <p>This section contains more personal and mature conversation prompts.</p>
+            <span class="modal-age-text">Are you 18 or older?</span>
+            <div class="modal-actions">
+                <button class="btn-modal btn-secondary" onclick="closeModal()">Return Home</button>
+                <button class="btn-modal btn-primary" onclick="confirmAge()">Yes, Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <span class="footer-brand">GAJEEHUB</span>
+        <span class="footer-quote">"Because the best conversations aren't accidental."</span>
+        <span class="footer-line"></span>
+        <div class="footer-links">
+            <a href="https://instagram.com/gajeness" target="_blank" class="footer-link">Instagram @gajeness</a>
+        </div>
+        <a href="mailto:gajenes10@gmail.com" class="footer-link" style="display:block; margin-top:15px; opacity:0.6;">gajenes10@gmail.com</a>
+    </footer>
+
+    <script>
+        /* --- Data --- */
+        const data = {
+            deep: {
+                title: "Deep",
+                questions: [
+                    "What is something you've never fully gotten over?",
+                    "What part of yourself do you hide most often?",
+                    "What fear influences your life the most?",
+                    "When was the last time you felt truly understood?",
+                    "What memory shaped who you are today?",
+                    "What do you wish more people knew about you?",
+                    "What lesson took you the longest to learn?",
+                    "What is your biggest insecurity right now?",
+                    "What do you think people misunderstand about you?",
+                    "What motivates you when nobody is watching?",
+                    "What would your younger self think of you today?",
+                    "What are you still trying to heal from?",
+                    "What keeps you awake at night?",
+                    "What does happiness actually mean to you?",
+                    "What is something you've never forgiven yourself for?",
+                    "What is your greatest strength?",
+                    "What do you fear losing most?",
+                    "What kind of person do you want to become?",
+                    "What belief has changed your life?",
+                    "What is something you've never told anyone?",
+                    "What do you think happens when people drift apart?",
+                    "What is your biggest regret?",
+                    "What makes life meaningful?",
+                    "What are you most proud of?",
+                    "What is one thing you wish you could change?",
+                    "What would you do if you knew you couldn't fail?",
+                    "What do you hope people remember about you?",
+                    "What do you think love really is?",
+                    "What scares you about the future?",
+                    "What's a question you've always wanted someone to ask you?"
+                ]
+            },
+            connection: {
+                title: "Connection",
+                questions: [
+                    "What was your first impression of me?",
+                    "What made you trust me?",
+                    "When do you feel closest to me?",
+                    "What's your favorite memory of us?",
+                    "What do you appreciate most about me?",
+                    "What makes you feel loved?",
+                    "What's something I do that makes you smile?",
+                    "What's something you wish we did more often?",
+                    "What's one thing we've overcome together?",
+                    "What makes our relationship unique?",
+                    "When did you realize I mattered to you?",
+                    "What's your favorite conversation we've had?",
+                    "What quality in me do you admire most?",
+                    "What's something you've learned from me?",
+                    "What's one thing you hope never changes about us?",
+                    "When have you felt most supported by me?",
+                    "What is one thing we understand about each other better than anyone else?",
+                    "What memory would you relive with me?",
+                    "What does a healthy relationship mean to you?",
+                    "What's a small thing I do that means a lot?",
+                    "What's something you wish I knew without having to tell me?",
+                    "What's one thing we should prioritize more?",
+                    "What makes you feel safe with someone?",
+                    "What's your favorite thing about spending time together?",
+                    "What's one challenge that made us stronger?",
+                    "What habit of mine do you secretly love?",
+                    "What makes you feel appreciated?",
+                    "How do you think we've changed each other?",
+                    "What does loyalty mean to you?",
+                    "How can I be a better partner or friend to you?"
+                ]
+            },
+            future: {
+                title: "Future",
+                questions: [
+                    "What does your dream life look like?",
+                    "Where do you see yourself in 10 years?",
+                    "What is your biggest goal right now?",
+                    "What kind of home do you want someday?",
+                    "What's something you're excited about?",
+                    "What country do you want to visit most?",
+                    "What would your perfect day look like?",
+                    "What skill do you want to learn?",
+                    "What's on your bucket list?",
+                    "What kind of lifestyle do you want?",
+                    "What does success mean to you?",
+                    "What adventure should we take together?",
+                    "What's your dream career?",
+                    "What motivates your future plans?",
+                    "What's a dream you're afraid to chase?",
+                    "What tradition would you like to create?",
+                    "What kind of people do you want around you?",
+                    "What would make you feel fulfilled?",
+                    "What's one thing worth sacrificing for?",
+                    "What project would you love to start?",
+                    "What does financial freedom mean to you?",
+                    "What achievement would make you proud?",
+                    "What's one thing you don't want to regret?",
+                    "What legacy would you like to leave?",
+                    "What's a place you'd love to live?",
+                    "What kind of future relationship do you want?",
+                    "What inspires you most?",
+                    "What challenge do you want to overcome?",
+                    "What dream have you had since childhood?",
+                    "What's one thing you hope happens this year?"
+                ]
+            },
+            unfiltered: {
+                title: "Unfiltered",
+                questions: [
+                    "What's a fantasy you've never told anyone but have thought about more than once?",
+                    "Where on your body do you love to be touched that most people wouldn't guess?",
+                    "What's the most attractive thing a partner has ever done that caught you off guard?",
+                    "What's your biggest turn-on that you'd be embarrassed to admit out loud?",
+                    "Have you ever had a dream about someone unexpected? Who?",
+                    "What's one thing you wish your partner would initiate more often?",
+                    "What's the most daring thing you've done to impress someone you were attracted to?",
+                    "What's your opinion on public displays of affection — where do you draw the line?",
+                    "Have you ever faked a feeling to keep the peace in bed? What happened?",
+                    "What's something you've always wanted to try but haven't asked for yet?",
+                    "What's a location you've always wanted to be intimate in but haven't?",
+                    "What's the boldest move you've ever made on someone you were attracted to?",
+                    "Have you ever been caught in a compromising situation? What's the story?",
+                    "What's your most memorable intimate experience and why did it stand out?",
+                    "What's one thing a partner did that instantly made you more attracted to them?",
+                    "What's a role or scenario that secretly intrigues you?",
+                    "What's something you consider a hard no that you'd be willing to reconsider with the right person?",
+                    "How do you feel about sending or receiving spicy photos — any rules you live by?",
+                    "What's the longest you've gone without physical intimacy and how did it affect you?",
+                    "What's one thing you've never done but your curiosity keeps coming back to?",
+                    "What's the most unexpected thing you find deeply attractive in a partner?",
+                    "If you could design a perfect night with your partner with zero limits, what would it look like?",
+                    "Have you ever had feelings for someone while in a relationship? What did you do?",
+                    "What's the most risqué thing you've done and felt zero regret about?",
+                    "What do you think about keeping secrets from a partner — where's the line?",
+                    "What's something you've never done in a relationship that you secretly want to experience?",
+                    "Have you ever developed feelings for a friend? Did anything happen?",
+                    "What's the most vulnerable thing you can share about your desires right now?",
+                    "What's a question you hope I never ask you — and what's your answer?",
+                    "What's something about your desires or needs you've never fully said out loud until now?"
+                ]
+            }
+        };
+
+        /* --- State --- */
+        let currentState = {
+            view: 'intro',
+            category: null,
+            index: 0
+        };
+
+        /* --- Sound Engine (Web Audio API) --- */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            
+            if (type === 'tap') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, t);
+                osc.frequency.exponentialRampToValueAtTime(300, t + 0.05);
+                gain.gain.setValueAtTime(0.08, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t);
+                osc.stop(t + 0.05);
+            } else if (type === 'swipe') {
+                const bufferSize = audioCtx.sampleRate * 0.2;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(1000, t);
+                filter.frequency.linearRampToValueAtTime(2000, t + 0.2);
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.linearRampToValueAtTime(0, t + 0.2);
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                noise.start(t);
+            }
+        }
+
+        /* --- Navigation --- */
+        function switchView(viewName) {
+            playSound('tap');
+            const current = document.querySelector(`main:not(.hidden)`);
+            if(current) {
+                current.style.opacity = '0';
+                setTimeout(() => {
+                    current.classList.add('hidden');
+                    current.style.opacity = '1';
+                    const next = document.getElementById(`view-${viewName}`);
+                    next.classList.remove('hidden');
+                    next.classList.add('fade-in');
+                    setTimeout(() => next.classList.remove('fade-in'), 1200);
+                }, 400);
+            } else {
+                document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            }
+            currentState.view = viewName;
+        }
+
+        function goToHome() {
+            switchView('home');
+        }
+
+        /* --- Category Logic --- */
+        function selectCategory(cat) {
+            playSound('tap');
+            currentState.category = cat;
+            currentState.index = 0;
+            updateQuestionUI();
+            switchView('question');
+        }
+
+        function checkAge() {
+            playSound('tap');
+            const modal = document.getElementById('age-modal');
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            playSound('tap');
+            document.getElementById('age-modal').classList.remove('active');
+        }
+
+        function confirmAge() {
+            playSound('tap');
+            closeModal();
+            selectCategory('unfiltered');
+        }
+
+        /* --- Question Logic --- */
+        function updateQuestionUI() {
+            const questions = getQuestions();
+            const card = document.getElementById('card-element');
+            const textEl = document.getElementById('q-text');
+            const currentEl = document.getElementById('q-current');
+            const totalEl = document.getElementById('q-total');
+            const prevBtn = document.getElementById('btn-prev');
+            const nextBtn = document.getElementById('btn-next');
+
+            textEl.innerText = questions[currentState.index];
+            currentEl.innerText = currentState.index + 1;
+            totalEl.innerText = questions.length;
+
+            prevBtn.disabled = currentState.index === 0;
+            nextBtn.innerText = currentState.index === questions.length - 1 ? "Finish" : "Next →";
+
+            card.classList.remove('card-in');
+            card.classList.add('card-out');
+            
+            setTimeout(() => {
+                card.classList.remove('card-out');
+                card.classList.add('card-in');
+            }, 50);
+        }
+
+        function getQuestions() {
+            return data[currentState.category].questions;
+        }
+
+        function nextQuestion() {
+            const questions = getQuestions();
+            if (currentState.index < questions.length - 1) {
+                playSound('swipe');
+                currentState.index++;
+                updateQuestionUI();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentState.index > 0) {
+                playSound('swipe');
+                currentState.index--;
+                updateQuestionUI();
+            }
+        }
+
+        /* --- Input Handling --- */
+        document.addEventListener('keydown', (e) => {
+            if (currentState.view !== 'question') return;
+            if (e.key === 'ArrowRight') nextQuestion();
+            if (e.key === 'ArrowLeft') prevQuestion();
+        });
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+        document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (currentState.view !== 'question') return;
+            const threshold = 50;
+            const diff = touchStartX - touchEndX;
+            if (diff > threshold) nextQuestion();
+            else if (diff < -threshold) prevQuestion();
+        }
+    </script>
+</body>
+</html>
