@@ -51,7 +51,6 @@
         /* Critical: Prevent Scrolling & Mobile Viewport Fix */
         body, html {
             height: 100%;
-            /* Modern mobile browsers fix */
             height: 100dvh; 
             overflow: hidden; 
             background-color: #FFFFFF;
@@ -92,11 +91,10 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- SOUND ENGINE (Minimal & Aesthetic) ---
+        // --- SOUND ENGINE ---
         const playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
-            
             const ctx = new AudioContext();
             const t = ctx.currentTime;
 
@@ -117,19 +115,15 @@
                 const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
                 const data = buffer.getChannelData(0);
                 for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-                
                 const noise = ctx.createBufferSource();
                 noise.buffer = buffer;
-                
                 const filter = ctx.createBiquadFilter();
                 filter.type = 'lowpass';
                 filter.frequency.setValueAtTime(400, t);
                 filter.frequency.linearRampToValueAtTime(100, t + 0.2);
-                
                 const gain = ctx.createGain();
                 gain.gain.setValueAtTime(0.03, t);
                 gain.gain.linearRampToValueAtTime(0, t + 0.2);
-                
                 noise.connect(filter);
                 filter.connect(gain);
                 gain.connect(ctx.destination);
@@ -240,6 +234,13 @@
                             Begin Journey
                         </button>
                     </div>
+
+                    {/* Made by Gajee Hub */}
+                    <div className="absolute bottom-6 w-full text-center z-20 animate-fade-rise-delay-2">
+                        <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-opacity cursor-default">
+                            Made by Gajee Hub
+                        </p>
+                    </div>
                 </div>
             );
         };
@@ -325,15 +326,17 @@
             }, [index]);
 
             return (
-                // h-screen flex flex-col ensures footer sticks to bottom
-                <div className="h-screen flex flex-col bg-white relative overflow-hidden">
-                     {/* Top absolute button - moved closer to top to save space */}
-                     <button onClick={() => { playSound('tap'); onBack(); }} className="absolute top-2 left-4 md:top-6 md:left-6 z-20 font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black transition-colors">
-                        ← Categories
-                    </button>
+                <div className="grid grid-rows-[auto_1fr_auto] h-screen w-full overflow-hidden bg-white relative">
+                    
+                    {/* Row 1: Header */}
+                    <div className="relative pt-2 px-4 shrink-0">
+                        <button onClick={() => { playSound('tap'); onBack(); }} className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black transition-colors">
+                            ← Categories
+                        </button>
+                    </div>
 
-                    {/* Middle Section: flex-1 takes remaining space, min-h-0 prevents overflow issues in flex children */}
-                    <div className="flex-1 flex items-center justify-center px-4 md:px-12 min-h-0">
+                    {/* Row 2: Content */}
+                    <div className="flex items-center justify-center px-4 md:px-12 overflow-hidden">
                         <div 
                             className={`w-full text-center transition-all duration-300 ${animating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}
                         >
@@ -341,9 +344,9 @@
                                 {index + 1} / {questions.length}
                             </p>
                             
-                            {/* Reduced font size clamp for mobile to prevent pushing footer off */}
-                            <h2 className="font-serif leading-snug md:leading-tight tracking-tight text-black px-1"
-                                style={{ fontSize: 'clamp(0.9rem, 3.5vw, 2rem)' }}>
+                            {/* Scaled by Width (vw) to restore PC size, Grid Layout keeps footer visible on Mobile */}
+                            <h2 className="font-serif leading-tight md:leading-tight tracking-tight text-black px-1"
+                                style={{ fontSize: 'clamp(1.2rem, 3.5vw, 2.5rem)' }}>
                                 {questions[index]}
                             </h2>
 
@@ -351,22 +354,24 @@
                         </div>
                     </div>
 
-                    {/* Footer: shrink-0 ensures this bar never gets squashed or pushed off */}
-                    <div className="shrink-0 flex justify-between items-center px-4 py-3 md:px-20 md:py-8 border-t border-gray-50 bg-white">
-                        <button 
-                            onClick={prev} 
-                            disabled={index === 0}
-                            className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black disabled:opacity-20 transition-all"
-                        >
-                            Previous
-                        </button>
-                        <button 
-                            onClick={next}
-                            disabled={index === questions.length - 1}
-                            className="px-5 py-2 md:px-8 md:py-3 rounded-full bg-black text-white text-[10px] md:text-xs tracking-widest uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
-                        >
-                            {index === questions.length - 1 ? 'Finish' : 'Next'}
-                        </button>
+                    {/* Row 3: Footer */}
+                    <div className="shrink-0 px-4 py-3 md:px-20 md:py-8 border-t border-gray-50 bg-white">
+                        <div className="flex justify-between items-center">
+                            <button 
+                                onClick={prev} 
+                                disabled={index === 0}
+                                className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black disabled:opacity-20 transition-all"
+                            >
+                                Previous
+                            </button>
+                            <button 
+                                onClick={next}
+                                disabled={index === questions.length - 1}
+                                className="px-5 py-2 md:px-8 md:py-3 rounded-full bg-black text-white text-[10px] md:text-xs tracking-widest uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
+                            >
+                                {index === questions.length - 1 ? 'Finish' : 'Next'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             );
