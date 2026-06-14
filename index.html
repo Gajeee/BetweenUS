@@ -207,7 +207,8 @@
             }, []);
 
             return (
-                <div className="relative w-full h-screen flex flex-col bg-white">
+                // Fixed to h-[100dvh] so bottom elements are visible on mobile
+                <div className="relative w-full h-[100dvh] flex flex-col bg-white">
                     <div className="hero-video-container">
                         <video ref={videoRef} className="hero-video" muted playsInline loop>
                             <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_031045_0e1165dd-ab48-46e3-ad3d-5fe77f217647.mp4" type="video/mp4" />
@@ -237,8 +238,8 @@
                         </button>
                     </div>
 
-                    {/* Made by Gajee Hub */}
-                    <div className="absolute bottom-6 w-full text-center z-20 animate-fade-rise-delay-2 pb-safe">
+                    {/* Made by Gajee Hub - Adjusted positioning for mobile visibility */}
+                    <div className="absolute bottom-8 w-full text-center z-30 animate-fade-rise-delay-2 pb-safe">
                         <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-opacity cursor-default">
                             Made by Gajee Hub
                         </p>
