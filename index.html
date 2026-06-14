@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Between Us</title>
     
     <!-- React & DOM -->
@@ -48,15 +48,17 @@
     </script>
 
     <style>
-        /* Critical: Prevent Scrolling & Mobile Viewport Fix */
+        /* Critical: Prevent Scrolling & Force Full Viewport */
         body, html {
             height: 100%;
-            height: 100dvh; 
+            width: 100%;
             overflow: hidden; 
             background-color: #FFFFFF;
             color: #000000;
             margin: 0;
             padding: 0;
+            /* iOS Safari Fix */
+            -webkit-text-size-adjust: 100%;
         }
 
         /* Cinematic Video Background */
@@ -236,7 +238,7 @@
                     </div>
 
                     {/* Made by Gajee Hub */}
-                    <div className="absolute bottom-6 w-full text-center z-20 animate-fade-rise-delay-2">
+                    <div className="absolute bottom-6 w-full text-center z-20 animate-fade-rise-delay-2 pb-safe">
                         <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-opacity cursor-default">
                             Made by Gajee Hub
                         </p>
@@ -326,17 +328,18 @@
             }, [index]);
 
             return (
-                <div className="grid grid-rows-[auto_1fr_auto] h-screen w-full overflow-hidden bg-white relative">
+                // FORCE DYNAMIC VIEWPORT HEIGHT and use Flexbox for stability
+                <div className="flex flex-col bg-white relative overflow-hidden" style={{ height: '100dvh' }}>
                     
-                    {/* Row 1: Header */}
-                    <div className="relative pt-2 px-4 shrink-0">
+                    {/* Row 1: Header - shrink-0 ensures it never compresses */}
+                    <div className="pt-2 px-4 shrink-0 h-12 flex items-center">
                         <button onClick={() => { playSound('tap'); onBack(); }} className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black transition-colors">
                             ← Categories
                         </button>
                     </div>
 
-                    {/* Row 2: Content */}
-                    <div className="flex items-center justify-center px-4 md:px-12 overflow-hidden">
+                    {/* Row 2: Content - flex-1 fills remaining space, overflow-hidden prevents scroll */}
+                    <div className="flex-1 flex items-center justify-center overflow-hidden px-4 md:px-12 min-h-0">
                         <div 
                             className={`w-full text-center transition-all duration-300 ${animating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}
                         >
@@ -344,7 +347,7 @@
                                 {index + 1} / {questions.length}
                             </p>
                             
-                            {/* Scaled by Width (vw) to restore PC size, Grid Layout keeps footer visible on Mobile */}
+                            {/* Width-based scaling for PC, Grid handles overflow */}
                             <h2 className="font-serif leading-tight md:leading-tight tracking-tight text-black px-1"
                                 style={{ fontSize: 'clamp(1.2rem, 3.5vw, 2.5rem)' }}>
                                 {questions[index]}
@@ -354,8 +357,8 @@
                         </div>
                     </div>
 
-                    {/* Row 3: Footer */}
-                    <div className="shrink-0 px-4 py-3 md:px-20 md:py-8 border-t border-gray-50 bg-white">
+                    {/* Row 3: Footer - shrink-0 ensures it stays at bottom, pb-safe for iPhone bar */}
+                    <div className="shrink-0 px-4 py-3 md:px-20 md:py-8 border-t border-gray-50 bg-white pb-[env(safe-area-inset-bottom)]">
                         <div className="flex justify-between items-center">
                             <button 
                                 onClick={prev} 
