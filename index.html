@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Between Us</title>
     
-    <!-- React & DOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- React & DOM (Switched to cdnjs for better local/server support) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,30 +18,31 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0..1@100..400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0..1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Configuration -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        serif: ['"Instrument Serif"', 'serif'],
-                        sans: ['"Inter"', 'sans-serif'],
-                    },
-                    colors: {
-                        black: '#000000',
-                        gray: { 400: '#6F6F6F', 500: '#555555' }
-                    },
-                    animation: {
-                        'fade-rise': 'fadeRise 0.8s ease-out forwards',
-                        'fade-rise-delay': 'fadeRise 0.8s ease-out 0.2s forwards',
-                        'fade-rise-delay-2': 'fadeRise 0.8s ease-out 0.4s forwards',
-                    },
-                    keyframes: {
-                        fadeRise: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
+        if (window.tailwind) {
+            window.tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            serif: ['"Instrument Serif"', 'serif'],
+                            sans: ['"Inter"', 'sans-serif'],
+                        },
+                        colors: {
+                            black: '#000000',
+                            gray: { 400: '#6F6F6F', 500: '#555555' }
+                        },
+                        animation: {
+                            'fade-rise': 'fadeRise 0.8s ease-out forwards',
+                            'fade-rise-delay': 'fadeRise 0.8s ease-out 0.2s forwards',
+                            'fade-rise-delay-2': 'fadeRise 0.8s ease-out 0.4s forwards',
+                        },
+                        keyframes: {
+                            fadeRise: {
+                                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                                '100%': { opacity: '1', transform: 'translateY(0)' },
+                            }
                         }
                     }
                 }
@@ -48,7 +51,6 @@
     </script>
 
     <style>
-        /* Critical: Prevent Scrolling & Force Full Viewport */
         body, html {
             height: 100%;
             width: 100%;
@@ -57,19 +59,24 @@
             color: #000000;
             margin: 0;
             padding: 0;
-            /* iOS Safari Fix */
-            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Cinematic Video Background */
+        .hero-bg-fallback {
+            background-image: url('https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?q=80&w=800&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%);
+        }
+
         .hero-video-container {
             position: absolute;
-            top: 300px;
-            inset: auto 0 0 0;
-            height: 120%;
+            inset: 0;
+            height: 100%;
+            width: 100%;
             overflow: hidden;
             z-index: 0;
-            opacity: 0.4;
+            opacity: 0.5;
             pointer-events: none;
         }
 
@@ -77,83 +84,123 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: opacity 0.5s ease-in-out;
-            filter: grayscale(10%);
+            filter: grayscale(20%);
         }
 
         .gradient-overlay {
-            background: linear-gradient(to bottom, #FFFFFF 0%, rgba(255,255,255,0) 20%, rgba(255,255,255,0) 80%, #FFFFFF 100%);
+            background: linear-gradient(to bottom, #FFFFFF 0%, rgba(255,255,255,0.8) 15%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 80%, #FFFFFF 100%);
+        }
+        
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            padding: 2rem;
+            background: #fafafa;
         }
     </style>
 </head>
 <body>
 
-    <div id="root"></div>
+    <div id="root" style="height: 100%; width: 100%;">
+        <div class="error-container">
+            <h2 style="color: #000; margin-bottom: 1rem;">Loading Experience...</h2>
+        </div>
+    </div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+    <script>
+        // 1. Detect if user is opening file directly (file:///) which breaks Babel
+        if (window.location.protocol === 'file:') {
+            document.getElementById('root').innerHTML = `
+                <div class="error-container">
+                    <h2 style="color: #000; font-size: 1.5rem; margin-bottom: 1rem;">⚠️ Local File Error</h2>
+                    <p style="color: #555; max-width: 400px; line-height: 1.6;">
+                        You are opening this file directly from your computer. Browsers block React/Babel from working this way for security reasons.
+                    </p>
+                    <br>
+                    <p style="color: #000; font-weight: 600;">
+                        How to fix:<br>
+                        <span style="font-weight: 400; color: #555;">
+                        If using VS Code, install <b>"Live Server"</b> extension and click "Go Live".<br>
+                        Otherwise, upload this file to <b>Netlify Drop</b> (free).
+                        </span>
+                    </p>
+                </div>
+            `;
+            throw new Error("Blocked file:// protocol to prevent Babel crash");
+        }
 
-        // --- SOUND ENGINE ---
+        // 2. Catch any other unexpected errors
+        window.onerror = function(message, source, lineno, colno, error) {
+            document.getElementById('root').innerHTML = `
+                <div class="error-container">
+                    <h2 style="color: red; margin-bottom: 1rem;">App Crashed</h2>
+                    <p style="color: #555;">${message} (Line ${lineno})</p>
+                </div>
+            `;
+            return false;
+        };
+    </script>
+
+    <script type="text/babel" data-presets="react">
+        const { useState, useEffect, useRef } = window.React;
+
         const playSound = (type) => {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
-            const t = ctx.currentTime;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
+                const t = ctx.currentTime;
 
-            if (type === 'tap') {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, t);
-                osc.frequency.exponentialRampToValueAtTime(300, t + 0.05);
-                gain.gain.setValueAtTime(0.05, t);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start(t);
-                osc.stop(t + 0.05);
-            } else if (type === 'transition') {
-                const bufferSize = ctx.sampleRate * 0.2;
-                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-                const noise = ctx.createBufferSource();
-                noise.buffer = buffer;
-                const filter = ctx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(400, t);
-                filter.frequency.linearRampToValueAtTime(100, t + 0.2);
-                const gain = ctx.createGain();
-                gain.gain.setValueAtTime(0.03, t);
-                gain.gain.linearRampToValueAtTime(0, t + 0.2);
-                noise.connect(filter);
-                filter.connect(gain);
-                gain.connect(ctx.destination);
-                noise.start(t);
-            }
+                if (type === 'tap') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, t);
+                    osc.frequency.exponentialRampToValueAtTime(300, t + 0.05);
+                    gain.gain.setValueAtTime(0.05, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.05);
+                } else if (type === 'transition') {
+                    const bufferSize = ctx.sampleRate * 0.2;
+                    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(400, t);
+                    filter.frequency.linearRampToValueAtTime(100, t + 0.2);
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.03, t);
+                    gain.gain.linearRampToValueAtTime(0, t + 0.2);
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(ctx.destination);
+                    noise.start(t);
+                }
+            } catch (e) { console.error(e); }
         };
 
-        // --- DATA ---
         const DATA = {
-            deep: [
-                "What is something you've never fully gotten over?", "What part of yourself do you hide most often?", "What fear influences your life the most?", "When was the last time you felt truly understood?", "What memory shaped who you are today?", "What do you wish more people knew about you?", "What lesson took you the longest to learn?", "What is your biggest insecurity right now?", "What do you think people misunderstand about you?", "What motivates you when nobody is watching?", "What would your younger self think of you today?", "What are you still trying to heal from?", "What keeps you awake at night?", "What does happiness actually mean to you?", "What is something you've never forgiven yourself for?", "What is your greatest strength?", "What do you fear losing most?", "What kind of person do you want to become?", "What belief has changed your life?", "What is something you've never told anyone?", "What do you think happens when people drift apart?", "What is your biggest regret?", "What makes life meaningful?", "What are you most proud of?", "What is one thing you wish you could change?", "What would you do if you knew you couldn't fail?", "What do you hope people remember about you?", "What do you think love really is?", "What scares you about the future?", "What's a question you've always wanted someone to ask you?"
-            ],
-            connection: [
-                "What was your first impression of me?", "What made you trust me?", "When do you feel closest to me?", "What's your favorite memory of us?", "What do you appreciate most about me?", "What makes you feel loved?", "What's something I do that makes you smile?", "What's something you wish we did more often?", "What's one thing we've overcome together?", "What makes our relationship unique?", "When did you realize I mattered to you?", "What's your favorite conversation we've had?", "What quality in me do you admire most?", "What's something you've learned from me?", "What's one thing you hope never changes about us?", "When have you felt most supported by me?", "What is one thing we understand about each other better than anyone else?", "What memory would you relive with me?", "What does a healthy relationship mean to you?", "What's a small thing I do that means a lot?", "What's something you wish I knew without having to tell me?", "What's one thing we should prioritize more?", "What makes you feel safe with someone?", "What's your favorite thing about spending time together?", "What's one challenge that made us stronger?", "What habit of mine do you secretly love?", "What makes you feel appreciated?", "How do you think we've changed each other?", "What does loyalty mean to you?", "How can I be a better partner or friend to you?"
-            ],
-            future: [
-                "What does your dream life look like?", "Where do you see yourself in 10 years?", "What is your biggest goal right now?", "What kind of home do you want someday?", "What's something you're excited about?", "What country do you want to visit most?", "What would your perfect day look like?", "What skill do you want to learn?", "What's on your bucket list?", "What kind of lifestyle do you want?", "What does success mean to you?", "What adventure should we take together?", "What's your dream career?", "What motivates your future plans?", "What's a dream you're afraid to chase?", "What tradition would you like to create?", "What kind of people do you want around you?", "What would make you feel fulfilled?", "What's one thing worth sacrificing for?", "What project would you love to start?", "What does financial freedom mean to you?", "What achievement would make you proud?", "What's one thing you don't want to regret?", "What legacy would you like to leave?", "What's a place you'd love to live?", "What kind of future relationship do you want?", "What inspires you most?", "What challenge do you want to overcome?", "What dream have you had since childhood?", "What's one thing you hope happens this year?"
-            ],
-            unfiltered: [
-                "What's a fantasy you've never told anyone but have thought about more than once?", "Where on your body do you love to be touched that most people wouldn't guess?", "What's the most attractive thing a partner has ever done that caught you off guard?", "What's your biggest turn-on that you'd be embarrassed to admit out loud?", "Have you ever had a dream about someone unexpected? Who?", "What's one thing you wish your partner would initiate more often?", "What's the most daring thing you've done to impress someone you were attracted to?", "What's your opinion on public displays of affection — where do you draw the line?", "Have you ever faked a feeling to keep the peace in bed? What happened?", "What's something you've always wanted to try but haven't asked for yet?", "What's a location you've always wanted to be intimate in but haven't?", "What's the boldest move you've ever made on someone you were attracted to?", "Have you ever been caught in a compromising situation? What's the story?", "What's your most memorable intimate experience and why did it stand out?", "What's one thing a partner did that instantly made you more attracted to them?", "What's a role or scenario that secretly intrigues you?", "What's something you consider a hard no that you'd be willing to reconsider with the right person?", "How do you feel about sending or receiving spicy photos — any rules you live by?", "What's the longest you've gone without physical intimacy and how did it affect you?", "What's one thing you've never done but your curiosity keeps coming back to?", "What's the most unexpected thing you find deeply attractive in a partner?", "If you could design a perfect night with your partner with zero limits, what would it look like?", "Have you ever had feelings for someone while in a relationship? What did you do?", "What's the most risqué thing you've done and felt zero regret about?", "What do you think about keeping secrets from a partner — where's the line?", "What's something you've never done in a relationship that you secretly want to experience?", "Have you ever developed feelings for a friend? Did anything happen?", "What's the most vulnerable thing you can share about your desires right now?", "What's a question you hope I never ask you — and what's your answer?", "What's something about your desires or needs you've never fully said out loud until now?"
-            ]
+            deep: ["What is something you've never fully gotten over?", "What part of yourself do you hide most often?", "What fear influences your life the most?", "When was the last time you felt truly understood?", "What memory shaped who you are today?", "What do you wish more people knew about you?", "What lesson took you the longest to learn?", "What is your biggest insecurity right now?", "What do you think people misunderstand about you?", "What motivates you when nobody is watching?", "What would your younger self think of you today?", "What are you still trying to heal from?", "What keeps you awake at night?", "What does happiness actually mean to you?", "What is something you've never forgiven yourself for?", "What is your greatest strength?", "What do you fear losing most?", "What kind of person do you want to become?", "What belief has changed your life?", "What is something you've never told anyone?", "What do you think happens when people drift apart?", "What is your biggest regret?", "What makes life meaningful?", "What are you most proud of?", "What is one thing you wish you could change?", "What would you do if you knew you couldn't fail?", "What do you hope people remember about you?", "What do you think love really is?", "What scares you about the future?", "What's a question you've always wanted someone to ask you?"],
+            connection: ["What was your first impression of me?", "What made you trust me?", "When do you feel closest to me?", "What's your favorite memory of us?", "What do you appreciate most about me?", "What makes you feel loved?", "What's something I do that makes you smile?", "What's something you wish we did more often?", "What's one thing we've overcome together?", "What makes our relationship unique?", "When did you realize I mattered to you?", "What's your favorite conversation we've had?", "What quality in me do you admire most?", "What's something you've learned from me?", "What's one thing you hope never changes about us?", "When have you felt most supported by me?", "What is one thing we understand about each other better than anyone else?", "What memory would you relive with me?", "What does a healthy relationship mean to you?", "What's a small thing I do that means a lot?", "What's something you wish I knew without having to tell me?", "What's one thing we should prioritize more?", "What makes you feel safe with someone?", "What's your favorite thing about spending time together?", "What's one challenge that made us stronger?", "What habit of mine do you secretly love?", "What makes you feel appreciated?", "How do you think we've changed each other?", "What does loyalty mean to you?", "How can I be a better partner or friend to you?"],
+            future: ["What does your dream life look like?", "Where do you see yourself in 10 years?", "What is your biggest goal right now?", "What kind of home do you want someday?", "What's something you're excited about?", "What country do you want to visit most?", "What would your perfect day look like?", "What skill do you want to learn?", "What's on your bucket list?", "What kind of lifestyle do you want?", "What does success mean to you?", "What adventure should we take together?", "What's your dream career?", "What motivates your future plans?", "What's a dream you're afraid to chase?", "What tradition would you like to create?", "What kind of people do you want around you?", "What would make you feel fulfilled?", "What's one thing worth sacrificing for?", "What project would you love to start?", "What does financial freedom mean to you?", "What achievement would make you proud?", "What's one thing you don't want to regret?", "What legacy would you like to leave?", "What's a place you'd love to live?", "What kind of future relationship do you want?", "What inspires you most?", "What challenge do you want to overcome?", "What dream have you had since childhood?", "What's one thing you hope happens this year?"],
+            unfiltered: ["What's a fantasy you've never told anyone but have thought about more than once?", "Where on your body do you love to be touched that most people wouldn't guess?", "What's the most attractive thing a partner has ever done that caught you off guard?", "What's your biggest turn-on that you'd be embarrassed to admit out loud?", "Have you ever had a dream about someone unexpected? Who?", "What's one thing you wish your partner would initiate more often?", "What's the most daring thing you've done to impress someone you were attracted to?", "What's your opinion on public displays of affection — where do you draw the line?", "Have you ever faked a feeling to keep the peace in bed? What happened?", "What's something you've always wanted to try but haven't asked for yet?", "What's a location you've always wanted to be intimate in but haven't?", "What's the boldest move you've ever made on someone you were attracted to?", "Have you ever been caught in a compromising situation? What's the story?", "What's your most memorable intimate experience and why did it stand out?", "What's one thing a partner did that instantly made you more attracted to them?", "What's a role or scenario that secretly intrigues you?", "What's something you consider a hard no that you'd be willing to reconsider with the right person?", "How do you feel about sending or receiving spicy photos — any rules you live by?", "What's the longest you've gone without physical intimacy and how did it affect you?", "What's one thing you've never done but your curiosity keeps coming back to?", "What's the most unexpected thing you find deeply attractive in a partner?", "If you could design a perfect night with your partner with zero limits, what would it look like?", "Have you ever had feelings for someone while in a relationship? What did you do?", "What's the most risqué thing you've done and felt zero regret about?", "What do you think about keeping secrets from a partner — where's the line?", "What's something you've never done in a relationship that you secretly want to experience?", "Have you ever developed feelings for a friend? Did anything happen?", "What's the most vulnerable thing you can share about your desires right now?", "What's a question you hope I never ask you — and what's your answer?", "What's something about your desires or needs you've never fully said out loud until now?"]
         };
-
-        // --- COMPONENTS ---
 
         const Navbar = ({ onViewChange }) => (
             <nav className="flex justify-start px-6 py-4 md:px-8 md:py-6 max-w-7xl mx-auto z-10 relative w-full">
-                <div className="font-serif text-2xl md:text-3xl tracking-tight text-black cursor-pointer hover:opacity-70 transition-opacity" onClick={() => { playSound('tap'); onViewChange('hero'); }}>
+                <div className="font-serif text-2xl md:text-3xl tracking-tight text-black cursor-pointer hover:opacity-70 transition-opacity select-none" onClick={() => { playSound('tap'); onViewChange('hero'); }}>
                     Between Us
                 </div>
             </nav>
@@ -161,56 +208,19 @@
 
         const Hero = ({ onBegin }) => {
             const videoRef = useRef(null);
-            const animationFrameId = useRef(null);
+            const [videoError, setVideoError] = useState(false);
 
             useEffect(() => {
                 const video = videoRef.current;
                 if (!video) return;
-
-                let isFadingOut = false;
-
-                const checkVideoTime = () => {
-                    if (!video || !video.duration) return;
-                    
-                    const currentTime = video.currentTime;
-                    const duration = video.duration;
-                    const fadeDuration = 0.5;
-
-                    if (currentTime < fadeDuration) {
-                        const opacity = currentTime / fadeDuration;
-                        video.style.opacity = opacity * 0.4;
-                    } 
-                    else if (currentTime > duration - fadeDuration) {
-                        if (!isFadingOut) {
-                            isFadingOut = true;
-                            video.style.opacity = 0;
-                        }
-                        if (currentTime >= duration) {
-                            video.pause();
-                            video.currentTime = 0;
-                            video.play().catch(e => {});
-                            video.style.opacity = 0;
-                            isFadingOut = false;
-                        }
-                    } else {
-                        video.style.opacity = 0.4;
-                    }
-                    animationFrameId.current = requestAnimationFrame(checkVideoTime);
-                };
-
-                video.play().catch(e => {});
-                animationFrameId.current = requestAnimationFrame(checkVideoTime);
-
-                return () => {
-                    if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-                };
+                video.play().catch(() => {});
             }, []);
 
             return (
-                // Fixed to h-[100dvh] so bottom elements are visible on mobile
-                <div className="relative w-full h-[100dvh] flex flex-col bg-white">
+                <div className="relative w-full h-[100dvh] flex flex-col bg-white overflow-hidden">
                     <div className="hero-video-container">
-                        <video ref={videoRef} className="hero-video" muted playsInline loop>
+                        <div className={`absolute inset-0 hero-bg-fallback transition-opacity duration-500 ${videoError ? 'opacity-100' : 'opacity-0'}`}></div>
+                        <video ref={videoRef} className="hero-video" muted playsInline loop autoPlay onError={() => setVideoError(true)}>
                             <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_031045_0e1165dd-ab48-46e3-ad3d-5fe77f217647.mp4" type="video/mp4" />
                         </video>
                         <div className="absolute inset-0 gradient-overlay z-10"></div>
@@ -219,30 +229,19 @@
                     <Navbar onViewChange={onBegin} />
 
                     <div className="flex-1 flex flex-col justify-center items-center text-center px-4 z-20 w-full">
-                        <h1 className="font-serif tracking-tight text-black mb-4 animate-fade-rise leading-tight"
-                            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>
+                        <h1 className="font-serif tracking-tight text-black mb-4 animate-fade-rise leading-tight selection:bg-gray-200" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>
                             Beyond <span className="text-gray-400 italic">silence</span>, we build the <span className="text-gray-400 italic">eternal</span>.
                         </h1>
-                        
-                        <p className="font-sans max-w-2xl mt-4 leading-relaxed text-gray-400 font-light animate-fade-rise-delay"
-                           style={{ fontSize: 'clamp(0.9rem, 2vw, 1.1rem)' }}>
-                            Some of the best moments in a relationship begin with a question.<br/>
-                            Take your time. Listen carefully. Be honest.
+                        <p className="font-sans max-w-2xl mt-4 leading-relaxed text-gray-500 font-light animate-fade-rise-delay" style={{ fontSize: 'clamp(0.9rem, 2vw, 1.1rem)' }}>
+                            Some of the best moments in a relationship begin with a question.<br/>Take your time. Listen carefully. Be honest.
                         </p>
-
-                        <button 
-                            onClick={() => { playSound('tap'); onBegin(); }}
-                            className="mt-8 bg-black text-white rounded-full px-10 py-3 md:px-14 md:py-4 text-xs md:text-sm tracking-[0.15em] uppercase hover:scale-105 transition-transform duration-300 animate-fade-rise-delay-2"
-                        >
+                        <button onClick={() => { playSound('tap'); onBegin(); }} className="mt-8 bg-black text-white rounded-full px-10 py-3 md:px-14 md:py-4 text-xs md:text-sm tracking-[0.15em] uppercase hover:scale-105 hover:bg-gray-800 active:scale-95 transition-all duration-300 animate-fade-rise-delay-2 shadow-lg">
                             Begin Journey
                         </button>
                     </div>
 
-                    {/* Made by Gajee Hub - Adjusted positioning for mobile visibility */}
-                    <div className="absolute bottom-8 w-full text-center z-30 animate-fade-rise-delay-2 pb-safe">
-                        <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-opacity cursor-default">
-                            Made by Gajee Hub
-                        </p>
+                    <div className="absolute bottom-8 w-full text-center z-30 animate-fade-rise-delay-2 pb-6">
+                        <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-opacity cursor-default">Made by Gajee Hub</p>
                     </div>
                 </div>
             );
@@ -251,40 +250,24 @@
         const Categories = ({ onSelect, onAgeCheck }) => {
             const categories = [
                 { id: 'deep', label: 'Deep', icon: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path> },
-                { id: 'connection', label: 'Connection', icon: <><circle cx="9" cy="12" r="8"></circle><circle cx="15" cy="12" r="8"></circle></> },
-                { id: 'future', label: 'Future', icon: <><path d="M12 22V12"></path><path d="M12 12c0-4 4-6 6-8 2 2 6 4 6 8"></path><path d="M12 12c0-4-4-6-6-8-2 2-6 4-6 8"></path></> },
-                { id: 'unfiltered', label: 'Unfiltered', icon: <rect x="3" y="3" width="18" height="18" rx="2" ry="2" transform="rotate(45 12 12)"></rect> }
+                { id: 'connection', label: 'Connection', icon: <g><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="4" /></g> },
+                { id: 'future', label: 'Future', icon: <g><path d="M12 2v20"/><path d="M12 12l5-5"/><path d="M12 12l-5-5"/></g> },
+                { id: 'unfiltered', label: 'Unfiltered', icon: <rect x="4" y="4" width="16" height="16" rx="4" transform="rotate(45 12 12)"></rect> }
             ];
 
             return (
-                <div className="h-screen flex flex-col justify-center items-center bg-white px-4 relative">
-                    
-                    <h2 className="font-serif tracking-tight mb-1 md:mb-2 text-black animate-fade-rise"
-                        style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>
-                        The Conversation
-                    </h2>
-                    <p className="font-sans text-gray-400 max-w-md mx-auto mb-4 md:mb-8 animate-fade-rise-delay text-xs md:text-sm">
-                        Choose a path.
-                    </p>
+                <div className="h-screen flex flex-col justify-center items-center bg-white px-4 relative overflow-y-auto">
+                    <h2 className="font-serif tracking-tight mb-1 md:mb-2 text-black animate-fade-rise" style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>The Conversation</h2>
+                    <p className="font-sans text-gray-400 max-w-md mx-auto mb-4 md:mb-8 animate-fade-rise-delay text-xs md:text-sm">Choose a path.</p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 w-full max-w-4xl animate-fade-rise-delay-2">
-                        {categories.map((cat, i) => (
-                            <div 
-                                key={cat.id}
-                                onClick={() => { 
-                                    playSound('tap'); 
-                                    cat.id === 'unfiltered' ? onAgeCheck() : onSelect(cat.id);
-                                }}
-                                className="group relative bg-gray-50 rounded-2xl md:rounded-3xl p-3 md:p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-xl hover:-translate-y-1"
-                            >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 w-full max-w-4xl animate-fade-rise-delay-2 pb-10">
+                        {categories.map((cat) => (
+                            <div key={cat.id} onClick={() => { playSound('tap'); cat.id === 'unfiltered' ? onAgeCheck() : onSelect(cat.id); }}
+                                className="group relative bg-gray-50 rounded-2xl md:rounded-3xl p-3 md:p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-xl hover:-translate-y-1 border border-transparent hover:border-gray-100 h-32 md:h-48">
                                 <div className="w-10 h-10 md:w-16 md:h-16 mb-2 md:mb-6 text-gray-300 group-hover:text-black transition-colors duration-300">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                        {cat.icon}
-                                    </svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">{cat.icon}</svg>
                                 </div>
-                                <h3 className="font-sans tracking-widest uppercase font-medium text-gray-400 group-hover:text-black transition-colors text-[10px] md:text-sm">
-                                    {cat.label}
-                                </h3>
+                                <h3 className="font-sans tracking-widest uppercase font-medium text-gray-400 group-hover:text-black transition-colors text-[10px] md:text-sm">{cat.label}</h3>
                             </div>
                         ))}
                     </div>
@@ -299,80 +282,38 @@
 
             const next = () => {
                 if (index < questions.length - 1 && !animating) {
-                    setAnimating(true);
-                    playSound('tap');
-                    setTimeout(() => {
-                        setIndex(prev => prev + 1);
-                        setAnimating(false);
-                    }, 300);
+                    setAnimating(true); playSound('tap');
+                    setTimeout(() => { setIndex(prev => prev + 1); setAnimating(false); }, 300);
                 }
             };
 
             const prev = () => {
                 if (index > 0 && !animating) {
-                    setAnimating(true);
-                    playSound('tap');
-                    setTimeout(() => {
-                        setIndex(prev => prev - 1);
-                        setAnimating(false);
-                    }, 300);
+                    setAnimating(true); playSound('tap');
+                    setTimeout(() => { setIndex(prev => prev - 1); setAnimating(false); }, 300);
                 }
             };
 
-            useEffect(() => {
-                const handleKey = (e) => {
-                    if (e.key === 'ArrowRight') next();
-                    if (e.key === 'ArrowLeft') prev();
-                };
-                window.addEventListener('keydown', handleKey);
-                return () => window.removeEventListener('keydown', handleKey);
-            }, [index]);
-
             return (
-                // FORCE DYNAMIC VIEWPORT HEIGHT and use Flexbox for stability
                 <div className="flex flex-col bg-white relative overflow-hidden" style={{ height: '100dvh' }}>
-                    
-                    {/* Row 1: Header - shrink-0 ensures it never compresses */}
-                    <div className="pt-2 px-4 shrink-0 h-12 flex items-center">
-                        <button onClick={() => { playSound('tap'); onBack(); }} className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black transition-colors">
-                            ← Categories
+                    <div className="pt-4 px-6 shrink-0 h-16 flex items-center">
+                        <button onClick={() => { playSound('tap'); onBack(); }} className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black transition-colors flex items-center gap-2">
+                            <span>←</span> Categories
                         </button>
                     </div>
 
-                    {/* Row 2: Content - flex-1 fills remaining space, overflow-hidden prevents scroll */}
-                    <div className="flex-1 flex items-center justify-center overflow-hidden px-4 md:px-12 min-h-0">
-                        <div 
-                            className={`w-full text-center transition-all duration-300 ${animating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}
-                        >
-                            <p className="font-serif italic text-gray-300 text-[8px] md:text-xs tracking-[0.2em] uppercase mb-2 md:mb-6">
-                                {index + 1} / {questions.length}
-                            </p>
-                            
-                            {/* Width-based scaling for PC, Grid handles overflow */}
-                            <h2 className="font-serif leading-tight md:leading-tight tracking-tight text-black px-1"
-                                style={{ fontSize: 'clamp(1.2rem, 3.5vw, 2.5rem)' }}>
-                                {questions[index]}
-                            </h2>
-
-                            <div className="mt-3 md:mt-8 h-px w-10 md:w-16 bg-gray-100 mx-auto"></div>
+                    <div className="flex-1 flex items-center justify-center overflow-hidden px-6 md:px-12 min-h-0">
+                        <div className={`w-full text-center transition-all duration-300 ${animating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+                            <p className="font-serif italic text-gray-300 text-[8px] md:text-xs tracking-[0.2em] uppercase mb-4 md:mb-8">{index + 1} / {questions.length}</p>
+                            <h2 className="font-serif leading-tight tracking-tight text-black px-2" style={{ fontSize: 'clamp(1.2rem, 3.5vw, 2.5rem)' }}>{questions[index]}</h2>
+                            <div className="mt-6 md:mt-10 h-px w-10 md:w-16 bg-gray-100 mx-auto"></div>
                         </div>
                     </div>
 
-                    {/* Row 3: Footer - Removed border line, increased padding for clean aesthetic */}
-                    <div className="shrink-0 px-4 py-6 md:px-20 md:py-10 bg-white pb-[env(safe-area-inset-bottom)]">
-                        <div className="flex justify-between items-center">
-                            <button 
-                                onClick={prev} 
-                                disabled={index === 0}
-                                className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black disabled:opacity-20 transition-all"
-                            >
-                                Previous
-                            </button>
-                            <button 
-                                onClick={next}
-                                disabled={index === questions.length - 1}
-                                className="px-5 py-2 md:px-8 md:py-3 rounded-full bg-black text-white text-[10px] md:text-xs tracking-widest uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
-                            >
+                    <div className="shrink-0 px-6 py-6 md:px-20 md:py-10 bg-white pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+                        <div className="flex justify-between items-center max-w-4xl mx-auto">
+                            <button onClick={prev} disabled={index === 0} className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black disabled:opacity-20 transition-all px-4 py-2">Previous</button>
+                            <button onClick={next} disabled={index === questions.length - 1} className="px-6 py-3 md:px-10 md:py-3 rounded-full bg-black text-white text-[10px] md:text-xs tracking-widest uppercase hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 shadow-md">
                                 {index === questions.length - 1 ? 'Finish' : 'Next'}
                             </button>
                         </div>
@@ -383,21 +324,14 @@
 
         const Modal = ({ isOpen, onClose, onConfirm }) => {
             if (!isOpen) return null;
-
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-rise">
-                    <div className="bg-white/90 backdrop-blur-md p-6 md:p-12 rounded-2xl md:rounded-3xl max-w-xs w-full text-center shadow-2xl mx-4">
-                        <h3 className="font-serif text-xl md:text-3xl mb-2 md:mb-4">Age Verification</h3>
-                        <p className="font-sans text-gray-500 mb-4 md:mb-6 leading-relaxed text-xs md:text-sm">
-                            This section contains mature conversation prompts. Are you 18 or older?
-                        </p>
-                        <div className="flex gap-2 md:gap-3 justify-center">
-                            <button onClick={() => { playSound('tap'); onClose(); }} className="px-4 py-2 md:px-6 md:py-2 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors uppercase text-[9px] md:text-[10px] tracking-wider">
-                                Return
-                            </button>
-                            <button onClick={() => { playSound('tap'); onConfirm(); }} className="px-4 py-2 md:px-6 md:py-2 rounded-full bg-black text-white hover:scale-105 transition-transform uppercase text-[9px] md:text-[10px] tracking-wider">
-                                Continue
-                            </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-rise px-4">
+                    <div className="bg-white/95 backdrop-blur-md p-6 md:p-10 rounded-2xl md:rounded-3xl max-w-sm w-full text-center shadow-2xl border border-white/20">
+                        <h3 className="font-serif text-2xl md:text-3xl mb-3 md:mb-4">Age Verification</h3>
+                        <p className="font-sans text-gray-500 mb-6 md:mb-8 leading-relaxed text-xs md:text-sm">This section contains mature conversation prompts. Are you 18 or older?</p>
+                        <div className="flex gap-3 md:gap-4 justify-center">
+                            <button onClick={() => { playSound('tap'); onClose(); }} className="px-5 py-2 md:px-6 md:py-2 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors uppercase text-[10px] md:text-[11px] tracking-wider">Return</button>
+                            <button onClick={() => { playSound('tap'); onConfirm(); }} className="px-5 py-2 md:px-6 md:py-2 rounded-full bg-black text-white hover:scale-105 active:scale-95 transition-transform uppercase text-[10px] md:text-[11px] tracking-wider shadow-lg">Continue</button>
                         </div>
                     </div>
                 </div>
@@ -409,59 +343,23 @@
             const [selectedCategory, setSelectedCategory] = useState(null);
             const [isModalOpen, setModalOpen] = useState(false);
 
-            const handleBegin = () => {
-                playSound('transition');
-                setView('categories');
-            };
-            
-            const handleSelectCategory = (cat) => {
-                setSelectedCategory(cat);
-                setView('question');
-            };
-
-            const handleBack = () => {
-                playSound('transition');
-                setView('categories');
-            };
-
-            const handleAgeCheck = () => setModalOpen(true);
-            const handleModalClose = () => setModalOpen(false);
-            const handleConfirmAge = () => {
-                handleModalClose();
-                handleSelectCategory('unfiltered');
-            };
-
             return (
-                <div className="h-screen bg-white">
-                    {view === 'hero' && <Hero onBegin={handleBegin} />}
+                <div className="h-screen bg-white font-sans">
+                    {view === 'hero' && <Hero onBegin={() => { playSound('transition'); setView('categories'); }} />}
                     
                     {(view === 'categories' || view === 'question') && (
                         <main className="h-full flex flex-col">
-                            {view === 'categories' && (
-                                <Categories 
-                                    onSelect={handleSelectCategory} 
-                                    onAgeCheck={handleAgeCheck}
-                                />
-                            )}
-                            {view === 'question' && (
-                                <QuestionView 
-                                    category={selectedCategory} 
-                                    onBack={handleBack}
-                                />
-                            )}
+                            {view === 'categories' && <Categories onSelect={(cat) => { setSelectedCategory(cat); setView('question'); }} onAgeCheck={() => setModalOpen(true)} />}
+                            {view === 'question' && <QuestionView category={selectedCategory} onBack={() => { playSound('transition'); setView('categories'); }} />}
                         </main>
                     )}
 
-                    <Modal 
-                        isOpen={isModalOpen} 
-                        onClose={handleModalClose} 
-                        onConfirm={handleConfirmAge}
-                    />
+                    <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)} onConfirm={() => { setModalOpen(false); setSelectedCategory('unfiltered'); setView('question'); }} />
                 </div>
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
+        const root = window.ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
