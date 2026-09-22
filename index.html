@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Between Us</title>
+    
+    <!-- React & DOM (Switched to cdnjs for better local/server support) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0..1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        if (window.tailwind) {
+            window.tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            serif: ['"Instrument Serif"', 'serif'],
+                            sans: ['"Inter"', 'sans-serif'],
+                        },
+                        colors: {
+                            black: '#000000',
+                            gray: { 400: '#6F6F6F', 500: '#555555' }
+                        },
+                        animation: {
+                            'fade-rise': 'fadeRise 0.8s ease-out forwards',
+                            'fade-rise-delay': 'fadeRise 0.8s ease-out 0.2s forwards',
+                            'fade-rise-delay-2': 'fadeRise 0.8s ease-out 0.4s forwards',
+                        },
+                        keyframes: {
+                            fadeRise: {
+                                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                                '100%': { opacity: '1', transform: 'translateY(0)' },
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden; 
+            background-color: #FFFFFF;
+            color: #000000;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .hero-bg-fallback {
+            background-image: url('https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?q=80&w=800&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%);
+        }
+
+        .hero-video-container {
+            position: absolute;
+            inset: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            z-index: 0;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .hero-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(20%);
+        }
+
+        .gradient-overlay {
+            background: linear-gradient(to bottom, #FFFFFF 0%, rgba(255,255,255,0.8) 15%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 80%, #FFFFFF 100%);
+        }
+
+        /* Global background video — sits behind every screen (hero, categories, questions) */
+        .global-video-container {
+            position: fixed;
+            inset: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .global-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(35%);
+            opacity: 0.18;
+        }
+
+        .global-video-wash {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.55);
+        }
+        
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            padding: 2rem;
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="root" style="height: 100%; width: 100%; background-color: #FFFFFF;"></div>
+
+    <script>
+        // 1. Detect if user is opening file directly (file:///) which breaks Babel
+        if (window.location.protocol === 'file:') {
+            document.getElementById('root').innerHTML = `
+                <div class="error-container">
+                    <h2 style="color: #000; font-size: 1.5rem; margin-bottom: 1rem;">⚠️ Local File Error</h2>
+                    <p style="color: #555; max-width: 400px; line-height: 1.6;">
+                        You are opening this file directly from your computer. Browsers block React/Babel from working this way for security reasons.
+                    </p>
+                    <br>
+                    <p style="color: #000; font-weight: 600;">
+                        How to fix:<br>
+                        <span style="font-weight: 400; color: #555;">
+                        If using VS Code, install <b>"Live Server"</b> extension and click "Go Live".<br>
+                        Otherwise, upload this file to <b>Netlify Drop</b> (free).
+                        </span>
+                    </p>
+                </div>
+            `;
+            throw new Error("Blocked file:// protocol to prevent Babel crash");
+        }
+
+        // 2. Catch any other unexpected errors
+        window.onerror = function(message, source, lineno, colno, error) {
+            document.getElementById('root').innerHTML = `
+                <div class="error-container">
+                    <h2 style="color: red; margin-bottom: 1rem;">App Crashed</h2>
+                    <p style="color: #555;">${message} (Line ${lineno})</p>
+                </div>
+            `;
+            return false;
+        };
+    </script>
+
+    <script type="text/babel" data-presets="react">
+        const { useState, useEffect, useRef } = window.React;
+
+        const playSound = (type) => {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
+                const t = ctx.currentTime;
+
+                if (type === 'tap') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, t);
+                    osc.frequency.exponentialRampToValueAtTime(300, t + 0.05);
+                    gain.gain.setValueAtTime(0.05, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.05);
+                } else if (type === 'transition') {
+                    const bufferSize = ctx.sampleRate * 0.2;
+                    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(400, t);
+                    filter.frequency.linearRampToValueAtTime(100, t + 0.2);
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0.03, t);
+                    gain.gain.linearRampToValueAtTime(0, t + 0.2);
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(ctx.destination);
+                    noise.start(t);
+                }
+            } catch (e) { console.error(e); }
+        };
+
+        const DATA = {
+            deep: ["What is something you've never fully gotten over?", "What part of yourself do you hide most often?", "What fear influences your life the most?", "When was the last time you felt truly understood?", "What memory shaped who you are today?", "What do you wish more people knew about you?", "What lesson took you the longest to learn?", "What is your biggest insecurity right now?", "What do you think people misunderstand about you?", "What motivates you when nobody is watching?", "What would your younger self think of you today?", "What are you still trying to heal from?", "What keeps you awake at night?", "What does happiness actually mean to you?", "What is something you've never forgiven yourself for?", "What is your greatest strength?", "What do you fear losing most?", "What kind of person do you want to become?", "What belief has changed your life?", "What is something you've never told anyone?", "What do you think happens when people drift apart?", "What is your biggest regret?", "What makes life meaningful?", "What are you most proud of?", "What is one habit you wish you could break?", "What would you do if you knew you couldn't fail?", "What do you hope people remember about you?", "What do you think love really is?", "What do you think is the hardest part of growing older?", "What's a question you've always wanted someone to ask you?", "What's a truth about yourself you've only recently accepted?", "What does being truly seen by someone feel like to you?", "What's the hardest goodbye you've ever had to say?", "What part of your past do you carry with you the most?", "What do you think is the difference between being alone and being lonely?", "What's something you needed to hear as a child that you never did?", "What does forgiveness mean to you?", "What's a version of yourself you're trying to let go of?", "What do you think makes someone truly strong?", "What's a moment that quietly changed how you see the world?", "What do you wish you worried about less?", "What's something you've outgrown but still miss?", "What does self-respect look like to you?", "What's a question about life you still don't have an answer to?", "What do you think it means to truly know someone?", "What's the bravest thing you've ever done, even if no one noticed?", "What do you think happens to unspoken feelings?", "What's something you protect fiercely about yourself?", "What do you believe about second chances?", "What would you want to say to the person you were five years ago?"],
+            connection: ["What was your first impression of me?", "What made you trust me?", "When do you feel closest to me?", "What's your favorite memory of us?", "What do you appreciate most about me?", "What makes you feel loved?", "What's something I do that makes you smile?", "What's something you wish we did more often?", "What's one thing we've overcome together?", "What makes our relationship unique?", "When did you realize I mattered to you?", "What's your favorite conversation we've had?", "What quality in me do you admire most?", "What's something you've learned from me?", "What's one thing you hope never changes about us?", "When have you felt most supported by me?", "What is one thing we understand about each other better than anyone else?", "What memory would you relive with me?", "What does a healthy relationship mean to you?", "What's something I've said that stuck with you?", "What's something you wish I knew without having to tell me?", "What's one thing we should prioritize more?", "What makes you feel safe with someone?", "What's your favorite thing about spending time together?", "What's one challenge that made us stronger?", "What habit of mine do you secretly love?", "What's a moment you felt truly proud to be with me?", "How do you think we've changed each other?", "What does loyalty mean to you?", "How can I be a better partner or friend to you?", "What's something about \"us\" you never want to take for granted?", "What's a moment you knew this was different from other relationships?", "What do you think we do best as a team?", "What's something you'd want us to try together for the first time?", "What's a fear you have about our relationship, if any?", "What's the most honest thing you've ever told me?", "What's something you've never had to explain to me, and you're grateful for that?", "What do you think keeps a relationship exciting long-term?", "What's a way I show love that you didn't expect at first?", "What's something you want more of from me, even if it's small?", "What do you think makes us laugh the most together?", "What's a disagreement we had that actually taught you something?", "What's one thing you never want to change about how we communicate?", "What's a dream you have that includes me?", "What do you think is the glue that holds us together?", "What's something you've never said out loud but always felt about us?", "What's a way you'd like us to grow closer this year?", "What do you think people notice about us when they see us together?", "What's the most comforting thing about being with me?", "What's one thing you'd want to tell our future selves about right now?"],
+            future: ["What does your dream life look like?", "Where do you see yourself in 10 years?", "What is your biggest goal right now?", "What kind of home do you want someday?", "What's something you're excited about?", "What country do you want to visit most?", "What would your perfect day look like?", "What skill do you want to learn?", "What's on your bucket list?", "What kind of lifestyle do you want?", "What does success mean to you?", "What adventure should we take together?", "What's your dream career?", "What motivates your future plans?", "What's a dream you're afraid to chase?", "What tradition would you like to create?", "What kind of people do you want around you?", "What would make you feel fulfilled?", "What's one thing worth sacrificing for?", "What's a skill or hobby you'd love to master eventually?", "What does financial freedom mean to you?", "What's something you want to be known for?", "What's one thing you don't want to regret?", "What legacy would you like to leave?", "What's a place you'd love to live?", "What kind of future relationship do you want?", "What inspires you most?", "What challenge do you want to overcome?", "What dream have you had since childhood?", "What's one thing you hope happens this year?", "What's a goal you've quietly set for yourself that you haven't told anyone?", "What does \"making it\" look like to you personally?", "What's a habit you want to build starting now?", "What kind of legacy matters most to you — impact, memories, or something else?", "What's a risk you're considering taking soon?", "What do you imagine your daily routine looking like in five years?", "What's something you want to unlearn before you get older?", "What would you regret not trying?", "What kind of person do you want to be known as at work or school?", "What's a milestone you're looking forward to?", "What does balance look like in the life you want?", "What's something you'd love to build from scratch someday?", "What role does travel play in the future you imagine?", "What's a fear about the future you're working to overcome?", "What does financial security actually feel like to you, beyond numbers?", "What kind of impact do you want to leave on the people around you?", "What's a version of success that has nothing to do with money?", "What's something you're actively working toward right now?", "What would you do differently if you weren't afraid of failing?", "What's one thing you hope is true about your life ten years from now?"],
+            unfiltered: ["What's a fantasy you've never told anyone but have thought about more than once?", "Where on your body do you love to be touched that most people wouldn't guess?", "What's the most attractive thing a partner has ever done that caught you off guard?", "What's your biggest turn-on that you'd be embarrassed to admit out loud?", "Have you ever had a dream about someone unexpected? Who?", "What's one thing you wish your partner would initiate more often?", "What's the most daring thing you've done to impress someone you were attracted to?", "What's your opinion on public displays of affection — where do you draw the line?", "Have you ever faked a feeling to keep the peace in bed? What happened?", "What's something you've always wanted to try but haven't asked for yet?", "What's a location you've always wanted to be intimate in but haven't?", "What's the boldest move you've ever made on someone you were attracted to?", "Have you ever been caught in a compromising situation? What's the story?", "What's your most memorable intimate experience and why did it stand out?", "What's one thing a partner did that instantly made you more attracted to them?", "What's a role or scenario that secretly intrigues you?", "What's something you consider a hard no that you'd be willing to reconsider with the right person?", "How do you feel about sending or receiving spicy photos — any rules you live by?", "What's the longest you've gone without physical intimacy and how did it affect you?", "What's one thing you've never done but your curiosity keeps coming back to?", "What's the most unexpected thing you find deeply attractive in a partner?", "If you could design a perfect night with your partner with zero limits, what would it look like?", "Have you ever had feelings for someone while in a relationship? What did you do?", "What's the most risqué thing you've done and felt zero regret about?", "What do you think about keeping secrets from a partner — where's the line?", "What's something you've never done in a relationship that you secretly want to experience?", "Have you ever developed feelings for a friend? Did anything happen?", "What's the most vulnerable thing you can share about your desires right now?", "What's a question you hope I never ask you — and what's your answer?", "What's something about your desires or needs you've never fully said out loud until now?", "What's a compliment about your body that always stays with you?", "What's one way you like to be pursued or chased?", "What's a moment of tension between you and someone that never got resolved?", "What outfit or look on a partner instantly gets your attention?", "What's something playful you wish happened more often between you and a partner?", "What's a \"line\" you've crossed for someone you were really into?", "What do you think is the most underrated form of intimacy?", "What's something you find irresistibly attractive in how someone speaks?", "What's a moment of chemistry with someone that surprised you?", "What's one thing you'd want a partner to notice about you without being told?", "What's your honest take on jealousy in a relationship?", "What's a small gesture that feels more intimate to you than words?", "What's something spontaneous you'd want to try with a partner?", "What's a memory of anticipation before seeing someone you liked?", "What's one thing that instantly makes you feel desired?", "What's your take on flirting — do you prefer subtle or bold?", "What's a compliment you've never said out loud but always thought?", "What's something about vulnerability with a partner that scares you a little?", "What's a moment you felt most confident and attractive?", "What's one thing you crave more of in a relationship — emotionally or physically?"],
+            bond: ["What made you want to be friends with me in the first place?", "What's a moment you knew our friendship was real?", "What do you value most about our friendship?", "What's something you've never told me but probably should?", "What's a memory with me you'd never trade for anything?", "What do you think makes a friendship last?", "What's one thing I do that makes you feel supported?", "What's a hard time I helped you through, even if I didn't realize it?", "What do you appreciate about how I show up for you?", "What's something you've learned about loyalty from our friendship?", "What's a moment you felt truly proud to call me a friend?", "What do you think we understand about each other that others don't?", "What's one thing you wish we talked about more?", "What's a fear you've never shared with me?", "What's something about yourself you only show around close friends?", "What's the most honest thing you've ever told me?", "What do you think has changed about our friendship over time?", "What's a quality in me you secretly admire?", "What's something you've never had to explain to me?", "What's a memory that still makes you emotional when you think about it?", "What do you think makes someone a \"ride or die\" friend?", "What's one thing you hope never changes between us?", "What's a moment you felt most understood by me?", "What's something you're grateful I never judged you for?", "What do you think friendship means at this point in your life?", "What's a way I've helped you grow as a person?", "What's something you'd want future-you to remember about our friendship?", "What's a struggle you've kept to yourself that I might not know about?", "What do you think is the difference between a friend and family?", "What's one thing you wish I understood about you better?", "What's a memory of us that still makes you laugh when you think about it?", "What's something you've never admitted you needed help with?", "What do you think makes our friendship different from others you've had?", "What's a time you felt truly seen by me?", "What's something you're afraid to lose as we both get older?", "What's one thing about your life right now you haven't told me?", "What do you think loyalty actually looks like in action?", "What's a compliment about yourself you'd never say out loud, but I might say about you?", "What's a moment you realized how much this friendship means to you?", "What's something you've changed your mind about because of a conversation with me?", "What do you think we bring out in each other?", "What's a memory from when we first met that you still think about?", "What's one thing you'd want to apologize for, even if it's small?", "What's something you've never asked me but always wondered?", "What do you think makes trust between friends so hard to rebuild once it's broken?", "What's a moment you felt like you could finally be yourself around me?", "What's something about growing older that worries you when it comes to friendships?", "What do you hope people say about our friendship years from now?", "What's one thing you've never thanked me for, but should have?", "What's a truth about our friendship you've never said out loud until now?"],
+            banter: ["What's the most ridiculous thing you've ever seen me do?", "What's a nickname you'd give me if you had to pick one right now?", "What's the funniest memory you have of us?", "If we were in a movie together, what genre would it be?", "What's one thing about me that always makes you laugh?", "What's the weirdest thing we've bonded over?", "What's a food you'd never let me choose again?", "If you had to describe me in three words, what would they be?", "What's the most chaotic plan we've ever made together?", "What's a talent you think I don't know I have?", "What's the worst advice I've ever given you?", "If we started a business together, what would it be?", "What's a habit of mine that's oddly specific?", "What's the most \"us\" thing that's ever happened?", "What's a conspiracy theory you secretly think might be true?", "What's the one thing you'd want me to stop doing immediately?", "If we swapped lives for a day, what's the first thing you'd do?", "What's the most embarrassing thing that's happened when we were together?", "What's a movie or show you think I'd hate but you'd love?", "What's the dumbest argument we've ever had?", "If you had to pick my celebrity lookalike, who would it be?", "What's a food combo you think is genius but everyone else thinks is gross?", "What's the most useless skill you're weirdly proud of?", "What's a trend you think I'd never survive if I tried it?", "If we were stuck on a deserted island, who would crack first?", "What's the funniest thing you've caught me doing when I thought no one was watching?", "What's a game or challenge you think you'd beat me at easily?", "If you had to rate my dance moves out of 10, what would it be?", "What's the weirdest dream you've had that involved me?", "What's a random fact you know that always surprises people?", "What's the most dramatic reaction you've ever had over something small?", "If we had a group chat name just for us, what would it be?", "What's a food you'd never share, even with me?", "What's the most \"extra\" thing you've ever done for fun?", "If I became famous, what do you think I'd be famous for?", "What's a childhood cartoon you'd still watch unironically?", "What's the pettiest thing you've ever held a grudge over?", "What's a superstition you secretly believe in?", "If you had to pick a theme song for our friendship, what would it be?", "What's the most useless purchase you've ever made and regretted?", "What's a weird talent you wish you had instead of the ones you actually have?", "What's the funniest way you've ever embarrassed yourself in public?", "What's an inside joke of ours you think no one else would understand?", "If we were cartoon characters, what show would we be in?", "What's a food you refuse to eat no matter what?", "What's the most chaotic thing that's happened on a night out with you?", "What's a hill you'd die on that most people think is ridiculous?", "If you had to survive a zombie apocalypse with just me, what's our game plan?", "What's the weirdest compliment you've ever received?", "What's one thing about our friendship you'd never change, even the annoying parts?"]
+        };
+
+        const Navbar = ({ onViewChange }) => (
+            <nav className="flex justify-start px-6 py-4 md:px-8 md:py-6 max-w-7xl mx-auto z-10 relative w-full">
+                <div className="font-serif text-2xl md:text-3xl tracking-tight text-black cursor-pointer hover:opacity-70 transition-opacity select-none" onClick={() => { playSound('tap'); onViewChange('hero'); }}>
+                    Between Us
+                </div>
+            </nav>
+        );
+
+        const Hero = ({ onBegin }) => {
+            const videoRef = useRef(null);
+            const [videoError, setVideoError] = useState(false);
+
+            useEffect(() => {
+                const video = videoRef.current;
+                if (!video) return;
+                video.play().catch(() => {});
+            }, []);
+
+            return (
+                <div className="relative w-full h-[100dvh] flex flex-col bg-white overflow-hidden">
+                    <div className="hero-video-container">
+                        <div className={`absolute inset-0 hero-bg-fallback transition-opacity duration-500 ${videoError ? 'opacity-100' : 'opacity-0'}`}></div>
+                        <video ref={videoRef} className="hero-video" muted playsInline loop autoPlay onError={() => setVideoError(true)}>
+                            <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_031045_0e1165dd-ab48-46e3-ad3d-5fe77f217647.mp4" type="video/mp4" />
+                        </video>
+                        <div className="absolute inset-0 gradient-overlay z-10"></div>
+                    </div>
+
+                    <Navbar onViewChange={onBegin} />
+
+                    <div className="flex-1 flex flex-col justify-center items-center text-center px-4 z-20 w-full">
+                        <h1 className="font-serif tracking-tight text-black mb-4 animate-fade-rise leading-tight selection:bg-gray-200" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>
+                            Beyond <span className="text-gray-400 italic">silence</span>, we build the <span className="text-gray-400 italic">eternal</span>.
+                        </h1>
+                        <p className="font-sans max-w-2xl mt-4 leading-relaxed text-gray-500 font-light animate-fade-rise-delay" style={{ fontSize: 'clamp(0.9rem, 2vw, 1.1rem)' }}>
+                            Some of the best moments in a relationship begin with a question.<br/>Take your time. Listen carefully. Be honest.
+                        </p>
+                        <button onClick={() => { playSound('tap'); onBegin(); }} className="mt-8 bg-black text-white rounded-full px-10 py-3 md:px-14 md:py-4 text-xs md:text-sm tracking-[0.15em] uppercase hover:scale-105 hover:bg-gray-800 active:scale-95 transition-all duration-300 animate-fade-rise-delay-2 shadow-lg">
+                            Begin Journey
+                        </button>
+                    </div>
+
+                    <div className="absolute bottom-8 w-full text-center z-30 animate-fade-rise-delay-2 pb-6">
+                        <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-opacity cursor-default">Made by Gajee Hub</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const Categories = ({ onSelect, onAgeCheck }) => {
+            const categories = [
+                { id: 'deep', label: 'Deep', icon: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path> },
+                { id: 'connection', label: 'Connection', icon: <g><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="4" /></g> },
+                { id: 'future', label: 'Future', icon: <g><path d="M12 2v20"/><path d="M12 12l5-5"/><path d="M12 12l-5-5"/></g> },
+                { id: 'bond', label: 'Bond', icon: <g><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g> },
+                { id: 'banter', label: 'Banter', icon: <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path> },
+                { id: 'unfiltered', label: 'Unfiltered', icon: <rect x="4" y="4" width="16" height="16" rx="4" transform="rotate(45 12 12)"></rect> }
+            ];
+
+            return (
+                <div className="h-screen flex flex-col justify-center items-center bg-white/90 px-4 relative overflow-y-auto">
+                    <h2 className="font-serif tracking-tight mb-1 md:mb-2 text-black animate-fade-rise" style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>The Conversation</h2>
+                    <p className="font-sans text-gray-400 max-w-md mx-auto mb-4 md:mb-8 animate-fade-rise-delay text-xs md:text-sm">Choose a path.</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 w-full max-w-4xl animate-fade-rise-delay-2 pb-10">
+                        {categories.map((cat) => (
+                            <div key={cat.id} onClick={() => { playSound('tap'); cat.id === 'unfiltered' ? onAgeCheck() : onSelect(cat.id); }}
+                                className="group relative bg-gray-50 rounded-2xl md:rounded-3xl p-3 md:p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-xl hover:-translate-y-1 border border-transparent hover:border-gray-100 h-32 md:h-48">
+                                <div className="w-10 h-10 md:w-16 md:h-16 mb-2 md:mb-6 text-gray-300 group-hover:text-black transition-colors duration-300">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">{cat.icon}</svg>
+                                </div>
+                                <h3 className="font-sans tracking-widest uppercase font-medium text-gray-400 group-hover:text-black transition-colors text-[10px] md:text-sm">{cat.label}</h3>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const QuestionView = ({ category, onBack }) => {
+            const [index, setIndex] = useState(0);
+            const [animating, setAnimating] = useState(false);
+            const questions = DATA[category];
+
+            const next = () => {
+                if (index < questions.length - 1 && !animating) {
+                    setAnimating(true); playSound('tap');
+                    setTimeout(() => { setIndex(prev => prev + 1); setAnimating(false); }, 300);
+                }
+            };
+
+            const prev = () => {
+                if (index > 0 && !animating) {
+                    setAnimating(true); playSound('tap');
+                    setTimeout(() => { setIndex(prev => prev - 1); setAnimating(false); }, 300);
+                }
+            };
+
+            return (
+                <div className="flex flex-col bg-white/90 relative overflow-hidden" style={{ height: '100dvh' }}>
+                    <div className="pt-4 px-6 shrink-0 h-16 flex items-center">
+                        <button onClick={() => { playSound('tap'); onBack(); }} className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black transition-colors flex items-center gap-2">
+                            <span>←</span> Categories
+                        </button>
+                    </div>
+
+                    <div className="flex-1 flex items-center justify-center overflow-hidden px-6 md:px-12 min-h-0">
+                        <div className={`w-full text-center transition-all duration-300 ${animating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+                            <p className="font-serif italic text-gray-300 text-[8px] md:text-xs tracking-[0.2em] uppercase mb-4 md:mb-8">{index + 1} / {questions.length}</p>
+                            <h2 className="font-serif leading-tight tracking-tight text-black px-2" style={{ fontSize: 'clamp(1.2rem, 3.5vw, 2.5rem)' }}>{questions[index]}</h2>
+                            <div className="mt-6 md:mt-10 h-px w-10 md:w-16 bg-gray-100 mx-auto"></div>
+                        </div>
+                    </div>
+
+                    <div className="shrink-0 px-6 py-6 md:px-20 md:py-10 bg-white pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+                        <div className="flex justify-between items-center max-w-4xl mx-auto">
+                            <button onClick={prev} disabled={index === 0} className="font-sans text-[10px] md:text-xs tracking-widest uppercase text-gray-400 hover:text-black disabled:opacity-20 transition-all px-4 py-2">Previous</button>
+                            <button onClick={next} disabled={index === questions.length - 1} className="px-6 py-3 md:px-10 md:py-3 rounded-full bg-black text-white text-[10px] md:text-xs tracking-widest uppercase hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 shadow-md">
+                                {index === questions.length - 1 ? 'Finish' : 'Next'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Modal = ({ isOpen, onClose, onConfirm }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-rise px-4">
+                    <div className="bg-white/95 backdrop-blur-md p-6 md:p-10 rounded-2xl md:rounded-3xl max-w-sm w-full text-center shadow-2xl border border-white/20">
+                        <h3 className="font-serif text-2xl md:text-3xl mb-3 md:mb-4">Age Verification</h3>
+                        <p className="font-sans text-gray-500 mb-6 md:mb-8 leading-relaxed text-xs md:text-sm">This section contains mature conversation prompts. Are you 18 or older?</p>
+                        <div className="flex gap-3 md:gap-4 justify-center">
+                            <button onClick={() => { playSound('tap'); onClose(); }} className="px-5 py-2 md:px-6 md:py-2 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors uppercase text-[10px] md:text-[11px] tracking-wider">Return</button>
+                            <button onClick={() => { playSound('tap'); onConfirm(); }} className="px-5 py-2 md:px-6 md:py-2 rounded-full bg-black text-white hover:scale-105 active:scale-95 transition-transform uppercase text-[10px] md:text-[11px] tracking-wider shadow-lg">Continue</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const GlobalBackgroundVideo = () => {
+            const videoRef = useRef(null);
+
+            useEffect(() => {
+                const video = videoRef.current;
+                if (!video) return;
+                video.play().catch(() => {});
+            }, []);
+
+            return (
+                <div className="global-video-container">
+                    {/* Replace the src below with your own .mp4 (hosted URL or data URI) */}
+                    <video ref={videoRef} muted playsInline loop autoPlay>
+                        <source src="YOUR-BACKGROUND-VIDEO-URL.mp4" type="video/mp4" />
+                    </video>
+                    <div className="global-video-wash"></div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [view, setView] = useState('hero'); 
+            const [selectedCategory, setSelectedCategory] = useState(null);
+            const [isModalOpen, setModalOpen] = useState(false);
+
+            return (
+                <div className="h-screen bg-white font-sans relative">
+                    <GlobalBackgroundVideo />
+
+                    <div className="relative z-10 h-full">
+                        {view === 'hero' && <Hero onBegin={() => { playSound('transition'); setView('categories'); }} />}
+
+                        {(view === 'categories' || view === 'question') && (
+                            <main className="h-full flex flex-col">
+                                {view === 'categories' && <Categories onSelect={(cat) => { setSelectedCategory(cat); setView('question'); }} onAgeCheck={() => setModalOpen(true)} />}
+                                {view === 'question' && <QuestionView category={selectedCategory} onBack={() => { playSound('transition'); setView('categories'); }} />}
+                            </main>
+                        )}
+
+                        <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)} onConfirm={() => { setModalOpen(false); setSelectedCategory('unfiltered'); setView('question'); }} />
+                    </div>
+                </div>
+            );
+        };
+
+        const root = window.ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
