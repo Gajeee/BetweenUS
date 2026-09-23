@@ -134,27 +134,6 @@
     <div id="root" style="height: 100%; width: 100%; background-color: #FFFFFF;"></div>
 
     <script>
-        // 1. Detect if user is opening file directly (file:///) which breaks Babel
-        if (window.location.protocol === 'file:') {
-            document.getElementById('root').innerHTML = `
-                <div class="error-container">
-                    <h2 style="color: #000; font-size: 1.5rem; margin-bottom: 1rem;">⚠️ Local File Error</h2>
-                    <p style="color: #555; max-width: 400px; line-height: 1.6;">
-                        You are opening this file directly from your computer. Browsers block React/Babel from working this way for security reasons.
-                    </p>
-                    <br>
-                    <p style="color: #000; font-weight: 600;">
-                        How to fix:<br>
-                        <span style="font-weight: 400; color: #555;">
-                        If using VS Code, install <b>"Live Server"</b> extension and click "Go Live".<br>
-                        Otherwise, upload this file to <b>Netlify Drop</b> (free).
-                        </span>
-                    </p>
-                </div>
-            `;
-            throw new Error("Blocked file:// protocol to prevent Babel crash");
-        }
-
         // 2. Catch any other unexpected errors
         window.onerror = function(message, source, lineno, colno, error) {
             document.getElementById('root').innerHTML = `
@@ -281,18 +260,18 @@
             ];
 
             return (
-                <div className="h-screen flex flex-col justify-center items-center bg-white/90 px-4 relative overflow-y-auto">
-                    <h2 className="font-serif tracking-tight mb-1 md:mb-2 text-black animate-fade-rise" style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>The Conversation</h2>
-                    <p className="font-sans text-gray-400 max-w-md mx-auto mb-4 md:mb-8 animate-fade-rise-delay text-xs md:text-sm">Choose a path.</p>
+                <div className="flex flex-col justify-center items-center bg-white/90 px-4 relative overflow-y-auto" style={{ height: '100dvh', WebkitOverflowScrolling: 'touch' }}>
+                    <h2 className="font-serif tracking-tight mb-1 md:mb-2 text-black animate-fade-rise" style={{ fontSize: 'clamp(1.3rem, 4vw, 2.5rem)' }}>The Conversation</h2>
+                    <p className="font-sans text-gray-400 max-w-md mx-auto mb-3 md:mb-8 animate-fade-rise-delay text-xs md:text-sm">Choose a path.</p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 w-full max-w-4xl animate-fade-rise-delay-2 pb-10">
+                    <div className="grid grid-cols-2 gap-2 md:gap-4 w-full max-w-4xl animate-fade-rise-delay-2 pb-[max(2rem,env(safe-area-inset-bottom))]">
                         {categories.map((cat) => (
                             <div key={cat.id} onClick={() => { playSound('tap'); cat.id === 'unfiltered' ? onAgeCheck() : onSelect(cat.id); }}
-                                className="group relative bg-gray-50 rounded-2xl md:rounded-3xl p-3 md:p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-xl hover:-translate-y-1 border border-transparent hover:border-gray-100 h-32 md:h-48">
-                                <div className="w-10 h-10 md:w-16 md:h-16 mb-2 md:mb-6 text-gray-300 group-hover:text-black transition-colors duration-300">
+                                className="group relative bg-gray-50 rounded-2xl md:rounded-3xl p-2 md:p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-xl hover:-translate-y-1 border border-transparent hover:border-gray-100 h-24 md:h-48">
+                                <div className="w-7 h-7 md:w-16 md:h-16 mb-1.5 md:mb-6 text-gray-300 group-hover:text-black transition-colors duration-300">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">{cat.icon}</svg>
                                 </div>
-                                <h3 className="font-sans tracking-widest uppercase font-medium text-gray-400 group-hover:text-black transition-colors text-[10px] md:text-sm">{cat.label}</h3>
+                                <h3 className="font-sans tracking-widest uppercase font-medium text-gray-400 group-hover:text-black transition-colors text-[9px] md:text-sm text-center">{cat.label}</h3>
                             </div>
                         ))}
                     </div>
